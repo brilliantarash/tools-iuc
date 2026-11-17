@@ -27,10 +27,15 @@ jobs:
       cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:  # FORK TEST ONLY: stand-in for the App token
+      checks: read
+      issues: write
+      pull-requests: write
 
     steps:
       - name: Generate App Token (repo-scoped)
         id: repo-token
+        if: false  # FORK TEST ONLY
         uses: actions/create-github-app-token@v3
         with:
           client-id: ${{ secrets.APP_CLIENT_ID }}
@@ -43,7 +48,7 @@ jobs:
         if: github.event_name == 'issue_comment'
         uses: actions/github-script@v9
         with:
-          github-token: ${{ steps.repo-token.outputs.token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
@@ -200,7 +205,7 @@ jobs:
         if: github.event_name == 'workflow_run'
         uses: actions/github-script@v9
         with:
-          github-token: ${{ steps.repo-token.outputs.token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
@@ -260,7 +265,7 @@ jobs:
             core.setOutput('pr-node-id', pr.node_id);
 
       - name: Generate App Token (project-scoped)
-        if: steps.check-pr.outputs.status || steps.check-review.outputs.status
+        if: false  # FORK TEST ONLY
         id: project-token
         uses: actions/create-github-app-token@v3
         with:
@@ -269,7 +274,7 @@ jobs:
           permission-organization-projects: write
 
       - name: Update PR Status on Project Board
-        if: steps.check-pr.outputs.status || steps.check-review.outputs.status
+        if: false  # FORK TEST ONLY
         uses: actions/github-script@v9
         env:
           STATUS: ${{ steps.check-pr.outputs.status || steps.check-review.outputs.status }}
